@@ -385,26 +385,128 @@
         </footer>
     </div>
 
-    <div class="meme-corner"
-        onclick="document.getElementById('memeImg').src='https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNHJqZ3R5eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4JmVwPXYxX2ludGVybmFsX2dpZl9ieV9pZCZjdD1n/l0HlIDU8q0lY5lHia/giphy.gif'">
-        <div class="meme-bubble">¡Monicius Jr 67 approves!</div>
+    <div class="meme-corner" onclick="toggleFiesta()">
+        <div class="meme-bubble">¡ACTIVA EL PROTOCOLO 67!</div>
         <img src="assets/monicius_junior_67.png" alt="👑" id="memeImg"
             onerror="this.style.display='none'; this.parentElement.insertAdjacentHTML('beforeend', '<span style=\'font-size: 50px;\'>🤴</span>')">
     </div>
 
+    <!-- Overlay de Fiesta -->
+    <div id="fiestaOverlay"
+        style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; z-index:999; background: rgba(0,0,0,0.8); overflow:hidden; pointer-events:none;">
+        <div id="big67"
+            style="position:absolute; top:50%; left:50%; transform:translate(-50%, -50%); font-size:30vw; font-weight:900; color:var(--accent-primary); text-shadow: 0 0 50px var(--accent-primary); animation: dance 0.5s infinite alternate, strobe 0.1s infinite;">
+            67</div>
+        <div id="strobeLight"
+            style="position:absolute; top:0; left:0; width:100%; height:100%; animation: flash 0.2s infinite; opacity: 0.3; background: white; mix-blend-mode: overlay;">
+        </div>
+    </div>
+
+    <!-- Reproductor de YouTube Oculto -->
+    <div id="yt-player-container" style="position: absolute; top: -1000px;">
+        <div id="player"></div>
+    </div>
+
+    <style>
+        @keyframes dance {
+            from {
+                transform: translate(-50%, -50%) rotate(-10deg) scale(1);
+            }
+
+            to {
+                transform: translate(-50%, -50%) rotate(10deg) scale(1.2);
+            }
+        }
+
+        @keyframes strobe {
+            0% {
+                color: #f00;
+                text-shadow: 0 0 50px #f00;
+            }
+
+            33% {
+                color: #0f0;
+                text-shadow: 0 0 50px #0f0;
+            }
+
+            66% {
+                color: #00f;
+                text-shadow: 0 0 50px #00f;
+            }
+
+            100% {
+                color: #f0f;
+                text-shadow: 0 0 50px #f0f;
+            }
+        }
+
+        @keyframes flash {
+            0% {
+                opacity: 0;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+
+            100% {
+                opacity: 0;
+            }
+        }
+    </style>
+
     <script>
         // Crear partículas sutiles
         const particlesContainer = document.getElementById('particles');
-        for (let i = 0; i < 20; i++) {
-            const particle = document.createElement('div');
-            particle.className = 'particle';
-            const size = Math.random() * 4 + 2;
-            particle.style.width = size + 'px';
-            particle.style.height = size + 'px';
-            particle.style.left = Math.random() * 100 + 'vw';
-            particle.style.animationDuration = (Math.random() * 15 + 10) + 's';
-            particle.style.animationDelay = (Math.random() * 10) + 's';
-            particlesContainer.appendChild(particle);
+        if (particlesContainer) {
+            for (let i = 0; i < 20; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                const size = Math.random() * 4 + 2;
+                particle.style.width = size + 'px';
+                particle.style.height = size + 'px';
+                particle.style.left = Math.random() * 100 + 'vw';
+                particle.style.animationDuration = (Math.random() * 15 + 10) + 's';
+                particle.style.animationDelay = (Math.random() * 10) + 's';
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        // Script de YouTube IFrame API
+        var tag = document.createElement('script');
+        tag.src = "https://www.youtube.com/iframe_api";
+        var firstScriptTag = document.getElementsByTagName('script')[0];
+        firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
+        var player;
+        function onYouTubeIframeAPIReady() {
+            player = new YT.Player('player', {
+                height: '0',
+                width: '0',
+                videoId: 't-dgPuArhHM',
+                events: {
+                    'onReady': onPlayerReady
+                }
+            });
+        }
+
+        function onPlayerReady(event) {
+            // Player listo
+        }
+
+        let fiestaActive = false;
+        function toggleFiesta() {
+            fiestaActive = !fiestaActive;
+            const overlay = document.getElementById('fiestaOverlay');
+            if (fiestaActive) {
+                overlay.style.display = 'block';
+                player.playVideo();
+                document.body.style.overflow = 'hidden';
+            } else {
+                overlay.style.display = 'none';
+                player.pauseVideo();
+                document.body.style.overflow = 'auto';
+            }
         }
     </script>
 </body>
