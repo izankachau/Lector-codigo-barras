@@ -5,7 +5,7 @@ Este proyecto implementa un sistema de Generación Aumentada por Recuperación q
 ## Estructura
 - `main_rag.py`: Script principal del sistema.
 - `data/`: Carpeta donde debes colocar tus archivos PDF o TXT para que la IA los aprenda.
-- `vector_db/`: Carpeta donde se guarda la base de datos vectorial (memoria).
+- `FAISS`: El sistema utiliza un índice FAISS interno para la búsqueda ultra-rápida.
 
 ## Instalación
 1. Instala las dependencias:
