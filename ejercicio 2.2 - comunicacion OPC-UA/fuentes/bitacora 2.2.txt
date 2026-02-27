@@ -1,0 +1,3 @@
+1. pido que copie el workflow que ha realizado en los dos proyectos anteriores y que lo repita para el OPC-UA
+2. pruebo lo que ha hecho, no funciona y pido que arregle el servidor y la aplicación
+3. arreglamos los errores y comprobamos el funcionamiento
