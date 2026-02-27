@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SCL Pro Generator | Siemens Industrial Edition</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700&family=JetBrains+Mono&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+    <div class="glass-container">
+        <header>
+            <div class="logo">
+                <span class="accent">SCL</span> PRO ANALYZER <span class="v2">v2.0</span>
+            </div>
+            <div class="status-bar">
+                <span class="dot active"></span> NÚCLEO ACTIVO
+            </div>
+        </header>
+
+        <main>
+            <section class="editor-section">
+                <div class="card editor-card">
+                    <div class="card-header">
+                        <h3><i class="icon"></i> Editor de Texto Estructurado</h3>
+                        <div class="editor-meta" id="current-template-info">Nuevo Programa</div>
+                    </div>
+                    <textarea id="scl-editor" placeholder="// Escriba su lógica de PLC aquí..."
+                        spellcheck="false"></textarea>
+                    <div class="actions">
+                        <button id="btn-check" class="btn-primary">ANALIZAR CÓDIGO</button>
+                        <button id="btn-save" class="btn-success">GUARDAR PLANTILLA</button>
+                        <button id="btn-new" class="btn-secondary">LIMPIAR</button>
+                    </div>
+                </div>
+
+                <div id="result-box" class="card result-box hidden">
+                    <div class="result-header">
+                        <h3>Diagnóstico Industrial</h3>
+                        <span id="result-badge" class="badge">SISTEMA OK</span>
+                    </div>
+                    <p id="result-message"></p>
+                    <div id="error-container" class="error-list">
+                        <!-- Errores detallados aquí -->
+                    </div>
+                </div>
+            </section>
+
+            <aside class="library-section">
+                <div class="card library-card">
+                    <div class="card-header">
+                        <h3>Librería Industrial</h3>
+                    </div>
+                    <div id="program-list" class="program-list">
+                        <!-- Cargado por JS -->
+                    </div>
+                </div>
+            </aside>
+        </main>
+
+        <!-- Modal para guardar -->
+        <div id="save-modal" class="modal hidden">
+            <div class="modal-content">
+                <h3>Guardar en Librería</h3>
+                <input type="text" id="modal-name" placeholder="Nombre del programa (ej: Control Bomba)">
+                <input type="text" id="modal-category" placeholder="Categoría (ej: Motores)">
+                <textarea id="modal-desc" placeholder="Descripción técnica breve..."></textarea>
+                <div class="modal-actions">
+                    <button id="modal-confirm" class="btn-primary">CONFIRMAR</button>
+                    <button id="modal-cancel" class="btn-secondary">CANCELAR</button>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            <p>&copy; 2025 EXAMEN INFORMÁTICA | IEC 61131-3 STANDARD | SIEMENS ECOSYSTEM</p>
+        </footer>
+    </div>
+
+    <script>
+        let currentProgramId = null;
+
+        async function loadPrograms() {
+            const resp = await fetch('/api/programs');
+            const data = await resp.json();
+            const list = document.getElementById('program-list');
+            list.innerHTML = '';
+            data.forEach(p => {
+                const item = document.createElement('div');
+                item.className = 'program-item';
+                item.innerHTML = `
+                    <div class="prog-info" onclick="loadToEditor(${p.id}, \`${p.name}\`, \`${p.category}\`, \`${p.description}\`, \`${p.code.replace(/\n/g, '\\n').replace(/'/g, "\\'")}\`)">
+                        <strong>${p.name}</strong>
+                        <span>${p.category}</span>
+                    </div>
+                    <div class="prog-actions">
+                        <button class="btn-mini btn-delete" onclick="deleteProgram(${p.id})">×</button>
+                    </div>
+                `;
+                list.appendChild(item);
+            });
+        }
+
+        function loadToEditor(id, name, cat, desc, code) {
+            currentProgramId = id;
+            document.getElementById('scl-editor').value = code.replace(/\\n/g, '\n');
+            document.getElementById('current-template-info').innerText = `${name} (${cat})`;
+            document.getElementById('result-box').classList.add('hidden');
+        }
+
+        document.getElementById('btn-new').onclick = () => {
+            currentProgramId = null;
+            document.getElementById('scl-editor').value = '';
+            document.getElementById('current-template-info').innerText = 'Nuevo Programa';
+            document.getElementById('result-box').classList.add('hidden');
+        };
+
+        // Análisis de errores mejorado
+        document.getElementById('btn-check').onclick = async () => {
+            const code = document.getElementById('scl-editor').value;
+            const resp = await fetch('/api/check', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ code })
+            });
+            const data = await resp.json();
+
+            const resultBox = document.getElementById('result-box');
+            const msg = document.getElementById('result-message');
+            const badge = document.getElementById('result-badge');
+            const container = document.getElementById('error-container');
+
+            resultBox.classList.remove('hidden', 'success-box', 'warning-box');
+            container.innerHTML = '';
+
+            if (data.status === 'success') {
+                resultBox.classList.add('success-box');
+                badge.innerText = 'SISTEMA OK';
+                msg.innerText = data.message;
+            } else {
+                resultBox.classList.add('warning-box');
+                badge.innerText = '¡FALLLO DETECTADO!';
+                msg.innerText = data.message;
+
+                data.errors.forEach(err => {
+                    const card = document.createElement('div');
+                    card.className = 'error-card';
+                    card.innerHTML = `
+                        <div class="err-header">
+                            <span class="err-line">LÍNEA ${err.line}</span>
+                            <span class="err-type">${err.type}</span>
+                        </div>
+                        <div class="err-desc">${err.desc}</div>
+                        <div class="err-fix"><strong>SOLUCIÓN:</strong> ${err.fix}</div>
+                    `;
+                    container.appendChild(card);
+                });
+            }
+        };
+
+        // Modal y Guardado
+        const modal = document.getElementById('save-modal');
+        document.getElementById('btn-save').onclick = () => {
+            if (currentProgramId) {
+                // Si ya existe, guardamos directamente o pedimos confirmación (aquí simplificado)
+                confirmSave();
+            } else {
+                modal.classList.remove('hidden');
+            }
+        };
+
+        document.getElementById('modal-cancel').onclick = () => modal.classList.add('hidden');
+
+        document.getElementById('modal-confirm').onclick = confirmSave;
+
+        async function confirmSave() {
+            const name = document.getElementById('modal-name').value || "Sin nombre";
+            const category = document.getElementById('modal-category').value || "General";
+            const description = document.getElementById('modal-desc').value || "";
+            const code = document.getElementById('scl-editor').value;
+
+            const body = { id: currentProgramId, name, category, description, code };
+
+            await fetch('/api/programs', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            });
+
+            modal.classList.add('hidden');
+            loadPrograms();
+        }
+
+        async function deleteProgram(id) {
+            if (confirm('¿Eliminar esta plantilla de la librería?')) {
+                await fetch(`/api/programs/${id}`, { method: 'DELETE' });
+                loadPrograms();
+            }
+        }
+
+        window.onload = loadPrograms;
+    </script>
+</body>
+
+</html>

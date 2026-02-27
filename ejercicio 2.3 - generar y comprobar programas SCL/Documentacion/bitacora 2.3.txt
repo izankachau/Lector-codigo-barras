@@ -1,0 +1,7 @@
+1. Investigo información sobre el estándar IEC 61131 y su implementación en Siemens SCL.
+2. Pido a Antigravity que, siguiendo el patrón del proyecto anterior, cree una solución completa (Backend/Database/Frontend) para gestionar programas SCL.
+3. Crear la estructura de carpetas estándar: Documentacion, Programa_SCL y Fuentes.
+4. Generar la documentación técnica detallada en Markdown basada en la investigación y normativas IEC.
+5. Desarrollar la aplicación v1.0 para generación y comprobación básica.
+6. Perfeccionar a v2.0: Implementar CRUD completo (Guardar, Editar, Borrar plantillas) y Análisis Inteligente (con diagnóstico de error y sugerencia de solución técnica).
+7. Actualizar manuales y convertir documentos a PDF con el estilo industrial para la entrega final.
