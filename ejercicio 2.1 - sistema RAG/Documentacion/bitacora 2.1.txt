@@ -1,0 +1,7 @@
+1. pregunto a Gemini info sobre lo que es un sistema rag
+2.pido a antigravity que basándose en el proyecto del código de barras, siga el mismo patrón para crear un sistema RAG y poderlo subir a GitHub
+3. comprobar funcionamiento
+4. hago que funcione sin api key y que funcione offline
+5. le pido que esta documentación la haga pdf y la deje bonita y lo deje guardado
+
+
